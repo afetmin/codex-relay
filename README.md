@@ -2,7 +2,7 @@
 
 macOS 菜单栏应用：勾选一个或多个 Codex 本机任务，明确因额度耗尽而失败后，等待额度实际恢复，在原会话发送续跑消息。
 
-[下载 Apple Silicon 版本](https://github.com/afetmin/codex-relay/releases/latest) · [第三方来源与许可证](THIRD_PARTY_NOTICES.md)
+[下载 Apple Silicon 版本](https://github.com/afetmin/codex-relay/releases/latest)
 
 ## 安装与构建
 
@@ -85,6 +85,4 @@ node Resources/monitor.mjs --diagnose
 
 该命令只验证连接和读取额度、少量任务列表，不会发送续跑消息。
 
-参考开源项目和许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。这是非官方配套工具。
-
-本项目以 [MIT License](LICENSE) 开源。
+MIT

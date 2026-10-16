@@ -1,5 +1,5 @@
-// Desktop IPC design informed by progressrdx/codex-auto-resume (MIT).
-// See THIRD_PARTY_NOTICES.md. No account tokens are read by this program.
+// SPDX-License-Identifier: MIT
+// No account tokens are read by this program.
 import net from 'node:net';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -189,7 +189,7 @@ export class ReadOnlyServer {
         reply.error ? pending.reject(new Error('额度或任务查询失败，请检查 Codex 登录和网络。')) : pending.resolve(reply.result);
       }
     });
-    await this.request('initialize', { clientInfo: { name: 'codex_relay', version: '0.1.0' }, capabilities: { experimentalApi: true } });
+    await this.request('initialize', { clientInfo: { name: 'codex_relay', version: '0.1.1' }, capabilities: { experimentalApi: true } });
     this.process.stdin.write(JSON.stringify({ method: 'initialized' }) + '\n');
   }
   request(method, params) {
