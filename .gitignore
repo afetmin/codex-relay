@@ -1,0 +1,16 @@
+# Local builds and release packages
+/*.app/
+*.zip
+.DS_Store
+
+# Local runtime, credentials, and tooling state
+.env
+.env.*
+!.env.example
+state.json
+*.tmp
+.codebase-memory/
+work/
+
+# Local product briefing (not part of the distributable)
+/PRODUCT.md
