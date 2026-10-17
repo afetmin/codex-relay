@@ -221,7 +221,10 @@ export function latestTurn(state) {
 }
 export function assess(state) {
   const result = (action, label, turn) => ({ action, label, turnId: turn?.turnId || turn?.id });
-  if (state.hostId !== 'local' || state.ephemeral !== false) return result('stop', '仅支持本机持久会话');
+  // Desktop stream snapshots omit ephemeral; persisted threads expose rolloutPath.
+  // Keep rejecting explicit ephemeral threads and snapshots with no persistence evidence.
+  const persistent = state.ephemeral === false || (state.ephemeral === undefined && typeof state.rolloutPath === 'string' && path.isAbsolute(state.rolloutPath));
+  if (state.hostId !== 'local' || !persistent) return result('stop', '仅支持本机持久会话');
   if (state.resumeState !== 'resumed') return result('wait', '等待会话加载');
   if (!Array.isArray(state.requests)) return result('wait', '等待审批状态同步');
   const queued = state.queuedFollowUps;
@@ -240,7 +243,7 @@ export function assess(state) {
 }
 export function fingerprint(state) {
   const data = {};
-  for (const k of ['id', 'hostId', 'cwd', 'latestModel', 'latestReasoningEffort', 'latestCollaborationMode', 'currentPermissions', 'latestThreadSettings', 'threadGoal', 'threadGoalResumeConfirmation', 'requests', 'queuedFollowUps', 'threadRuntimeStatus', 'resumeState']) data[k] = state[k] ?? null;
+  for (const k of ['id', 'hostId', 'ephemeral', 'rolloutPath', 'cwd', 'latestModel', 'latestReasoningEffort', 'latestCollaborationMode', 'currentPermissions', 'latestThreadSettings', 'threadGoal', 'threadGoalResumeConfirmation', 'requests', 'queuedFollowUps', 'threadRuntimeStatus', 'resumeState']) data[k] = state[k] ?? null;
   data.turn = latestTurn(state);
   return createHash('sha256').update(stable(data)).digest('hex');
 }
@@ -467,7 +470,7 @@ async function diagnose() {
     if (snapshotId) {
       const snapshot = await desktop.snapshot(snapshotId);
       const decision = assess(snapshot);
-      live = { runtime: snapshot.threadRuntimeStatus, resumeState: snapshot.resumeState, requests: snapshot.requests?.length, decision: decision.action, label: decision.label, historyKind: snapshot.turnHistory?.kind, hasModel: !!snapshot.latestModel };
+      live = { hostId: snapshot.hostId, ephemeral: snapshot.ephemeral ?? null, hasRolloutPath: typeof snapshot.rolloutPath === 'string' && path.isAbsolute(snapshot.rolloutPath), runtime: snapshot.threadRuntimeStatus, resumeState: snapshot.resumeState, requests: snapshot.requests?.length, decision: decision.action, label: decision.label, historyKind: snapshot.turnHistory?.kind, hasModel: !!snapshot.latestModel };
     }
     process.stdout.write(JSON.stringify({ ok: true, appVersion, quota: quotaStatus(raw).quota, listedTasks: list.data?.length, live }, null, 2) + '\n');
   } finally { desktop.close(); server.close(); }
